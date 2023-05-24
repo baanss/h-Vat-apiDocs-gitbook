@@ -4,7 +4,7 @@ description: h-vat (Hutom Video Annotation Tool) API Docs (작성중)
 
 # Introduction
 
-## Hutom Annotation Tool API
+## Hutom Annotation Tool API
 
 사내에서 사용중인 h-vat API에 대한 문서입니다.
 
@@ -21,7 +21,7 @@ Last Updated At : 2023. 05. 24 (Wed) 14:53 (Asia/Seoul)
 
 > Google Docs : \[[Link](https://docs.google.com/document/d/1oMv\_sxEzvJUFiEH-hPig-7OnLKNk-iQwdIpWNBl1YXw/)]
 >
-> Github Page : \[[Link](https://github.com/baanss/h-vat-docs-gitbook)]
+> Github Page : \[[Link](https://github.com/baanss/h-vat-apiDocs-gitbook)]
 
 ## Want to jump right in?
 
