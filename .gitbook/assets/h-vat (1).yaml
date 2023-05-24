@@ -1,0 +1,1149 @@
+openapi: 3.0.0
+info:
+  description: |
+    Hutom Video Annotation Tool API Docs.
+    (In progress Document)
+  version: 1.0.0
+  title: h-vat
+  termsOfService: "https://docs.google.com/document/d/1oMv_sxEzvJUFiEH-hPig-7OnLKNk-iQwdIpWNBl1YXw/edit?usp=sharing"
+  contact:
+    email: bans@hutom.co.kr
+
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/BANS/h-vat/1.0.0
+tags:
+  - name: users
+    description: Operations about user
+    externalDocs:
+      description: Check more Info on GitBook
+      url: "https://bans.gitbook.io/h-vat-api-docs/"
+  - name: login
+    description: Login User
+    externalDocs:
+      description: Check more Info on GitBook
+      url: "https://bans.gitbook.io/h-vat-api-docs/"
+  - name: auth
+    description: Authorization User
+  - name: videos
+    description: Operations about video
+  - name: video-tasks
+    description: Manage Video Tasks
+  - name: notifications
+    description: Manage notifications
+  - name: annotations
+    description: Operations about annotations
+paths:
+  /users:
+    post:
+      tags:
+        - users
+      summary: Create user
+      description: This can only be done by the logged in Admin user.
+      operationId: createUser
+      parameters:
+        - in: cookie
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+      responses:
+        "201":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: user created
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+        description: Created user object
+        required: true
+    get:
+      tags:
+        - users
+      summary: /users?role=ROLE - Fetch Users
+      description: This can only be done by the logged in Admin user.
+      operationId: fetchUsersWithRole
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+        - in: query
+          name: role
+          description: User's Role
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden
+  "/users/{id}":
+    patch:
+      tags:
+        - users
+      summary: Patch Specific User
+      description: This can only be done by the User himself OR Admin.
+      operationId: updateUserWithId
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+        - in: path
+          name: id
+          description: 변경할 User의 ID
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isAgreed:
+                  type: boolean
+                  description: 약관 동의 여부
+                  example: true
+                name:
+                  type: string
+                  description: 사용자 이름
+                image:
+                  type: string
+                  description: 사용자 프로필 이미지 (Base64 encoded)
+                role:
+                  type: object
+                  properties:
+                    annotator:
+                      type: boolean
+                      example: true
+                    inspector:
+                      type: boolean
+                      example: false
+                    admin:
+                      type: boolean
+                      example: false
+                  description: Admin만 변경 가능
+                isActive:
+                  type: boolean
+                  description: Admin만 변경 가능
+      responses:
+        "200":
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: user information updated
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden, Mismatched UserID or Admin Only
+    delete:
+      tags:
+        - users
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: 삭제할 User의 ID
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: user deleted
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden, Mismatched UserID or Admin Only
+  "/users/{id}/password":
+    put:
+      tags:
+        - users
+      summary: Change User Password
+      operationId: changeUserPwd
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+        - in: path
+          name: id
+          description: 비밀번호를 변경할 User의 ID
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                  description: 새로운 Password
+      responses:
+        "200":
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: user information updated
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden, Mismatched UserID or Admin Only
+  /login:
+    post:
+      tags:
+        - login
+      summary: User Login
+      operationId: loginUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: 유저의 email
+                  example: example@hutom.io
+                password:
+                  type: string
+                  description: 새로운 Password
+                  example: example
+      responses:
+        "200":
+          description: successful operation
+          headers:
+            Set-Cookie:
+              description: Set AccessToken
+              schema:
+                type: string
+                example: accessToken=eyJhbGciOi...
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: login successed
+        "401":
+          description: 401 Unauthorized, Invalid Mail or Invalid Password
+  /auth:
+    get:
+      tags:
+        - auth
+      summary: Check Token
+      operationId: checkUserAuth
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+        "401":
+          description: 401 Unauthorized, Invalid Token
+  /videos:
+    get:
+      tags:
+        - videos
+      summary: fetch Video Lists
+      operationId: fetchVideos
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+        - in: query
+          name: saved
+          description: true or false. DB에 저장된 비디오 또는 저장되지 않은 비디오 조회
+          schema:
+            type: boolean
+            default: false
+          required: true
+      responses:
+        "200":
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Video"
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden, Access Admin Only
+  "/videos/{id}":
+    get:
+      tags:
+        - videos
+      summary: /videos/{id}?quality=QUALITY [fetch Video with ID]
+      operationId: fetchVideoWithId
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+        - in: path
+          name: id
+          description: video id
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: quality
+          description: 480p, 720p, 1080p 중에 하나
+          schema:
+            type: string
+            default: 1080p
+      responses:
+        "200":
+          description: 200 OK
+          content:
+            video/mp4:
+              schema:
+                type: string
+                format: binary
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden, Task dose not exist
+  /videos/update-many:
+    post:
+      tags:
+        - videos
+      summary: Update Videos
+      operationId: updateVideos
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                videos:
+                  type: array
+                  description: 업데이트할 video _id들의 배열
+                  items:
+                    type: string
+                  example: ["task_id 1", "task_id 2", "..."]
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: videos updated
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden, Access Admin Only
+  /videos/delete-many:
+    post:
+      tags:
+        - videos
+      summary: Delete Videos
+      operationId: deleteVideos
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                videos:
+                  type: array
+                  description: 삭제할 video _id들의 배열
+                  items:
+                    type: string
+                  example: ["task_id 1", "task_id 2", "..."]
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: videos deleted
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden, Access Admin Only
+  /video-tasks:
+    get:
+      tags:
+        - video-tasks
+      summary: /video-tasks?isActive=true [fetch Video Tasks List]
+      operationId: fetchVideoTasks
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+        - in: query
+          name: isActive
+          description: Default - true | false일 경우, 숨김처리된 task들을 가져옴
+          schema:
+            type: boolean
+            default: true
+          required: true
+      responses:
+        "200":
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/VideoTask"
+        "401":
+          description: 401 Unauthorized, Invalid Token
+    post:
+      tags:
+        - video-tasks
+      summary: Create Video Tasks
+      operationId: createVideoTasks
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                videos:
+                  type: array
+                  description: 생성 video task들의 배열
+                  items:
+                    $ref: "#/components/schemas/VideoTask"
+      responses:
+        "201":
+          description: 201 created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  successCount:
+                    type: number
+                    example: 5
+                    description: 저장에 성공한 task의 수 (중복저장X)
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden, Access Admin Only
+  "/video-tasks/{id}":
+    get:
+      tags:
+        - video-tasks
+      summary: Fetch Video Task
+      operationId: fetchVideoTaskWithId
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+        - in: path
+          name: id
+          description: 원하는 video task의 ID
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VideoTask"
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "404":
+          description: 404 Not Found, The data does not exist
+        "400":
+          description: 400 Bad Request, Invalid id value
+        "403":
+          description: 403 Forbidden, Users Must be match the Task Annotator
+  "/video-tasks/{id}/status":
+    put:
+      tags:
+        - video-tasks
+      summary: Update Video Task Status
+      operationId: updateVideoTaskStatus
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+        - in: path
+          name: id
+          description: 변경할 video task의 ID
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  type: string
+                  example: IN_PROGRESS
+      responses:
+        "201":
+          description: 201 created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: status updated
+                    description: 저장 성공 확인 메시지
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "404":
+          description: 404 Not Found, The data does not exist
+        "400":
+          description: 400 Bad Request, Invalid id value
+        "403":
+          description: 403 Forbidden, Users Must be match the Task Annotator
+  /video-tasks/update-many:
+    post:
+      tags:
+        - video-tasks
+      summary: Update Video Tasks
+      operationId: updateVideoTasks
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tasks:
+                  type: array
+                  description: 업데이트할 video task 들의 id 배열
+                  items:
+                    type: string
+                  example: ["task_id 1", "task_id 2", "..."]
+                status:
+                  type: string
+                  description: 업데이트 할 status 값
+                  example: IN_PROGRESS
+                isActive:
+                  type: boolean
+                  description: 업데이트 할 isActive 값
+                  example: true
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: tasks updated
+                    description: 저장 성공 확인
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden, Access Admin Only
+  /video-tasks/download-many:
+    post:
+      tags:
+        - video-tasks
+      summary: Download Video Tasks
+      operationId: downloadVideoTasks
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tasks:
+                  type: array
+                  description: 다운로드 받을 video task 들의 id 배열
+                  items:
+                    type: string
+                  example: ["task_id 1", "task_id 2", "..."]
+      responses:
+        "200":
+          description: download zip file.
+          headers:
+            Content-Type:
+              description: application/zip
+              schema:
+                type: string
+                format: file
+            Content-Disposition:
+              description: 'attachment; filename="ANNOTATION_TYPE.json"'
+              schema:
+                type: string
+                format: json
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: file
+                example: BLOOD_STAINED_TISSUE.zip
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden, Access Admin Only
+  /video-tasks/delete-many:
+    post:
+      tags:
+        - video-tasks
+      summary: Delete Video Tasks
+      operationId: deleteVideoTasks
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tasks:
+                  type: array
+                  description: 삭제할 video task 들의 id 배열
+                  items:
+                    type: string
+                  example: ["task_id 1", "task_id 2", "..."]
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: tasks deleted
+                    description: task 삭제 성공 확인 메시지
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden, Access Admin Only
+  /notifications:
+    get:
+      tags:
+        - notifications
+      summary: fetch Notifications List
+      operationId: fetchNotifications
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+        "401":
+          description: 401 Unauthorized, Invalid Token
+  /notifications/markAsRead:
+    post:
+      tags:
+        - notifications
+      summary: Read Notifications
+      operationId: readNotifications
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  description: 읽음으로 처리할 notification id들의 배열
+                  type: array
+                  items:
+                    type: string
+                    example: 5f71439d20ee25b2, 5f758e6a520ee25b3
+      responses:
+        "200":
+          description: 200 OK (readAt - 현재시각으로 변경)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: notifications updated
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "404":
+          description: 404 Not Found, The data does not exist
+        "400":
+          description: 400 Bad Request, Invalid id value
+        "403":
+          description: 403 Forbidden, User ID Must be match the Recevier ID
+  "/annotations/{id}/data":
+    put:
+      tags:
+        - annotations
+      summary: Update Annotation
+      operationId: updateAnnotationData
+      parameters:
+        - in: path
+          name: id
+          description: 변경할 annotation의 id
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  description: annotation object가 담긴 배열
+                  type: array
+                  items:
+                    type: object
+      responses:
+        "200":
+          description: 200 OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: annotation updated
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden, User ID Must be match the Annotator ID
+  /annotations/download:
+    get:
+      tags:
+        - annotations
+      summary: /annotations/download?type=ANNOTATION_TYPE [Download Annotations]
+      operationId: downloadAnnotations
+      parameters:
+        - in: header
+          name: accessToken
+          description: 로그인중인 사용자의 accessToken
+          schema:
+            type: string
+        - in: query
+          name: type
+          description: 다운받을 Annotation의 Type (ALL일 경우, 전체 다운로드)
+          schema:
+            type: string
+            enum:
+              - ARMES
+              - ONLY_ARMES
+              - ACTIVE_BLEEDING_AN
+              - ACTIVE_BLEEDING_IN
+              - BLOOD_COLLECTED
+              - BLOOD_STAINED_TISSUE
+              - INTERVENTION_AB
+              - INTERVENTION_IV
+              - AI_EMPOWERED
+              - ORGAN
+              - HSDB_SELECTION
+              - GRADING
+              - AB_FRAME_AB
+              - AB_FRAME_FRAME
+              - FRAME_SELECTION
+              - CHOLEC_PHASE
+              - CHOLEC_SKILL_ASSESSMENT
+              - GASTRECTOMY_GOALS
+              - GASTRECTOMY_GEARS
+              - PRESENCE
+              - INSTRUMENTS_PRES
+              - ALL
+            default: ALL
+          required: true
+      responses:
+        "200":
+          description: download zip file.
+          headers:
+            Content-Type:
+              description: application/zip
+              schema:
+                type: string
+                format: file
+            Content-Disposition:
+              description: 'attachment; filename="ANNOTATION_TYPE.json"'
+              schema:
+                type: string
+                format: json
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: file
+                example: BLOOD_STAINED_TISSUE.zip
+        "401":
+          description: 401 Unauthorized, Invalid Token
+        "403":
+          description: 403 Forbidden, Access Admin Only
+externalDocs:
+  description: Find out more about h-vat on GitBook
+  url: "https://bans.gitbook.io/h-vat-api-docs/"
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Object Id (Auto Gen)
+        email:
+          type: string
+          description: Login ID (Mail Addr)
+        password:
+          type: string
+          description: encrypted password
+        image:
+          type: string
+          description: base64 encoded
+        phoneNumber:
+          type: string
+          description: User's Phone Number
+        task:
+          type: string
+          enum:
+            - VIDEO
+            - RUS
+          description: Video or RUS TASK (User)
+        role:
+          type: object
+          properties:
+            annotator:
+              type: boolean
+            admin:
+              type: boolean
+            inspector:
+              type: boolean
+          description: User's Role (Annotator, Inspector, Admin)
+          example: { annotator: true, admin: false, inspector: false }
+        isAgreed:
+          type: boolean
+          description: Whether you agree to the terms
+          example: false
+        isActive:
+          type: boolean
+          description: Whether the user is active
+          example: true
+        accWorked:
+          type: number
+          description: acc worked time (ms)
+        accTasks:
+          type: number
+          description: acc worked tasks
+        lastLogin:
+          type: number
+          format: date-time
+          description: Last Logined At
+    Video:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Object Id (Auto Gen)
+        indexCode:
+          type: string
+          description: Anonymize Code
+        path:
+          type: string
+          description: Video Path
+        totalFrame:
+          type: number
+          description: Total frame of video
+        width:
+          type: number
+          description: video width
+        height:
+          type: number
+          description: video height
+        frameRate:
+          type: number
+          description: (?)frame rate
+        dataSet:
+          type: string
+          description: (?)data set
+    VideoTask:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Object Id (Auto Gen)
+        taskKey:
+          type: string
+          description: userId + video + annotationType
+        video:
+          type: string
+          format: ObjectId
+          description: Video ID (Ref)
+        # video:
+        #   $ref: '#/components/schemas/Video'
+        annotatorId:
+          type: string
+          format: ObjectId
+          description: User ID (Ref) - annotator
+        managerId:
+          type: string
+          format: ObjectId
+          description: User ID (Ref) - admin
+        taskType:
+          type: string
+          enum:
+            - ANNOTATION
+            - INSPECTION
+          description: Task Type
+        annotationType:
+          type: string
+          enum:
+            - ARMES
+            - ONLY_ARMES
+            - ACTIVE_BLEEDING_AN
+            - ACTIVE_BLEEDING_IN
+            - BLOOD_COLLECTED
+            - BLOOD_STAINED_TISSUE
+            - INTERVENTION_AB
+            - INTERVENTION_IV
+            - AI_EMPOWERED
+            - ORGAN
+            - HSDB_SELECTION
+            - GRADING
+            - AB_FRAME_AB
+            - AB_FRAME_FRAME
+            - FRAME_SELECTION
+            - CHOLEC_PHASE
+            - CHOLEC_SKILL_ASSESSMENT
+            - GASTRECTOMY_GOALS
+            - GASTRECTOMY_GEARS
+            - PRESENCE
+            - INSTRUMENTS_PRESENCE
+            - ORGAN_PRESENCE
+          description: Annotation Types
+        status:
+          type: string
+          enum:
+            - TODO
+            - IN_PROGRESS
+            - DONE
+          description: Video Task Status
+        annotations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Annotation"
+          description: Array List of Annotations
+        isActive:
+          type: boolean
+          description: whether to activate
+          example: true
+    Notification:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Object Id (Auto Gen)
+        message:
+          type: string
+          description: Noti Message
+        readAt:
+          type: number
+          format: date-time
+          description: Noti Read Time
+        createdAt:
+          type: number
+          format: date-time
+          description: Noti Created Time
+        taskId:
+          type: string
+          format: ObjectId
+          description: Linked Task ID
+        senderId:
+          type: string
+          format: ObjectId
+          description: Linked User ID (Sender)
+        receiverId:
+          type: string
+          format: ObjectId
+          description: Linked User ID (Receiver)
+    Annotation:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Object Id (Auto Gen)
+        videoTaskId:
+          type: string
+          format: ObjectId
+          description: Linked Video Task ID
+        type:
+          type: string
+          enum:
+            - ARMES
+            - ONLY_ARMES
+            - ACTIVE_BLEEDING_AN
+            - ACTIVE_BLEEDING_IN
+            - BLOOD_COLLECTED
+            - BLOOD_STAINED_TISSUE
+            - INTERVENTION_AB
+            - INTERVENTION_IV
+            - AI_EMPOWERED
+            - ORGAN
+            - HSDB_SELECTION
+            - GRADING
+            - AB_FRAME_AB
+            - AB_FRAME_FRAME
+            - FRAME_SELECTION
+            - CHOLEC_PHASE
+            - CHOLEC_SKILL_ASSESSMENT
+            - GASTRECTOMY_GOALS
+            - GASTRECTOMY_GEARS
+            - PRESENCE
+            - INSTRUMENTS_PRES
+          description: Annotation Types
+        data:
+          type: array
+          items:
+            type: object
+          description: Different datas for each annotation.
+  requestBodies:
+    User:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/User"
+      description: User object
+      required: true
+    UserArray:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/User"
+      description: List of user object
+      required: true
