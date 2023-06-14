@@ -12,14 +12,14 @@ description: 알림 API
 
 Notification List 받아오기
 
-{% swagger src="../../.gitbook/assets/h-vat.yaml" path="/notifications" method="get" %}
-[h-vat.yaml](../../.gitbook/assets/h-vat.yaml)
+{% swagger src="../../.gitbook/assets/h-vat (1).yaml" path="/notifications" method="get" %}
+[h-vat (1).yaml](<../../.gitbook/assets/h-vat (1).yaml>)
 {% endswagger %}
 
 ## Update Notification
 
 Notification 읽음으로 변경
 
-{% swagger src="../../.gitbook/assets/h-vat.yaml" path="/notifications/markAsRead" method="post" %}
-[h-vat.yaml](../../.gitbook/assets/h-vat.yaml)
+{% swagger src="../../.gitbook/assets/h-vat (1).yaml" path="/notifications/markAsRead" method="post" %}
+[h-vat (1).yaml](<../../.gitbook/assets/h-vat (1).yaml>)
 {% endswagger %}

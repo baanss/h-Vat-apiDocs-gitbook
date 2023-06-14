@@ -37,17 +37,13 @@ tags:
 paths:
   /users:
     post:
+      security:
+        - bearerAuth: []
       tags:
         - users
       summary: Create user
       description: This can only be done by the logged in Admin user.
       operationId: createUser
-      parameters:
-        - in: cookie
-          name: accessToken
-          description: 로그인중인 사용자의 accessToken
-          schema:
-            type: string
       responses:
         "201":
           description: successful operation
@@ -60,9 +56,7 @@ paths:
                     type: string
                     example: user created
         "401":
-          description: 401 Unauthorized, Invalid Token
-        "403":
-          description: 403 Forbidden
+          $ref: "#/components/responses/UnauthorizedError"
       requestBody:
         content:
           application/json:
@@ -301,7 +295,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/User"
+                  $ref: "#/components/schemas/CurrentUserOutput"
         "401":
           description: 401 Unauthorized, Invalid Token
   /videos:
@@ -522,7 +516,7 @@ paths:
     get:
       tags:
         - video-tasks
-      summary: /video-tasks?isActive=true [fetch Video Tasks List]
+      summary: Fetch Video Task
       operationId: fetchVideoTaskWithId
       parameters:
         - in: header
@@ -909,6 +903,14 @@ externalDocs:
   description: Find out more about h-vat on GitBook
   url: "https://bans.gitbook.io/h-vat-api-docs/"
 components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # optional, arbitrary value for documentation purposes
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
   schemas:
     User:
       type: object
@@ -922,6 +924,9 @@ components:
         password:
           type: string
           description: encrypted password
+        name:
+          type: string
+          description: User Name
         image:
           type: string
           description: base64 encoded
@@ -963,6 +968,46 @@ components:
           type: number
           format: date-time
           description: Last Logined At
+    CurrentUserOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Object Id (Auto Gen)
+          example: "646b2e6455814c2c3f6eca83"
+        email:
+          type: string
+          description: Login ID (Mail Addr)
+          example: "bans@hutom.co.kr"
+        name:
+          type: string
+          description: User Name
+          example: "John Doe"
+        task:
+          type: string
+          enum:
+            - VIDEO
+            - RUS
+          description: Video or RUS TASK (User)
+        role:
+          type: object
+          properties:
+            annotator:
+              type: boolean
+            admin:
+              type: boolean
+            inspector:
+              type: boolean
+          description: User's Role (Annotator, Inspector, Admin)
+          example: { annotator: true, admin: false, inspector: false }
+        isAgreed:
+          type: boolean
+          default: true
+          description: Whether you agree to the terms
+        isActive:
+          type: boolean
+          default: true
+          description: Whether the user is active
     Video:
       type: object
       properties:

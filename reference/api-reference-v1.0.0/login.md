@@ -20,6 +20,6 @@ JWT 토큰을 이용해 Header - Set-Cookie 값으로 AccessToken을 전달합�
 
 사용자 로그인
 
-{% swagger src="../../.gitbook/assets/h-vat.yaml" path="/login" method="post" %}
-[h-vat.yaml](../../.gitbook/assets/h-vat.yaml)
+{% swagger src="../../.gitbook/assets/h-vat (1).yaml" path="/login" method="post" %}
+[h-vat (1).yaml](<../../.gitbook/assets/h-vat (1).yaml>)
 {% endswagger %}

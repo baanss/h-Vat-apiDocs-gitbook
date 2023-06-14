@@ -20,6 +20,6 @@ RefreshToken을 사용한 Restore AccessToken 등 보완이 필요합니다.
 
 현재 로그인한 유저의 인증 정보 (AccessToken) 확인
 
-{% swagger src="../../.gitbook/assets/h-vat.yaml" path="/auth" method="get" %}
-[h-vat.yaml](../../.gitbook/assets/h-vat.yaml)
+{% swagger src="../../.gitbook/assets/h-vat (1).yaml" path="/auth" method="get" %}
+[h-vat (1).yaml](<../../.gitbook/assets/h-vat (1).yaml>)
 {% endswagger %}

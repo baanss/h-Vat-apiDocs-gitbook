@@ -35,30 +35,30 @@ User 생성
 
 User 리스트 가져오기
 
-{% swagger src="../../.gitbook/assets/h-vat.yaml" path="/users" method="get" %}
-[h-vat.yaml](../../.gitbook/assets/h-vat.yaml)
+{% swagger src="../../.gitbook/assets/h-vat (1).yaml" path="/users" method="get" %}
+[h-vat (1).yaml](<../../.gitbook/assets/h-vat (1).yaml>)
 {% endswagger %}
 
 ## Patch Specific User
 
 User 정보 변경
 
-{% swagger src="../../.gitbook/assets/h-vat.yaml" path="/users/{id}" method="patch" %}
-[h-vat.yaml](../../.gitbook/assets/h-vat.yaml)
+{% swagger src="../../.gitbook/assets/h-vat (1).yaml" path="/users/{id}" method="patch" %}
+[h-vat (1).yaml](<../../.gitbook/assets/h-vat (1).yaml>)
 {% endswagger %}
 
 ## Change user Password
 
 User password 변경
 
-{% swagger src="../../.gitbook/assets/h-vat.yaml" path="/users/{id}/password" method="put" %}
-[h-vat.yaml](../../.gitbook/assets/h-vat.yaml)
+{% swagger src="../../.gitbook/assets/h-vat (1).yaml" path="/users/{id}/password" method="put" %}
+[h-vat (1).yaml](<../../.gitbook/assets/h-vat (1).yaml>)
 {% endswagger %}
 
 ## Delete User
 
 User 삭제
 
-{% swagger src="../../.gitbook/assets/h-vat.yaml" path="/users/{id}" method="delete" %}
-[h-vat.yaml](../../.gitbook/assets/h-vat.yaml)
+{% swagger src="../../.gitbook/assets/h-vat (1).yaml" path="/users/{id}" method="delete" %}
+[h-vat (1).yaml](<../../.gitbook/assets/h-vat (1).yaml>)
 {% endswagger %}
