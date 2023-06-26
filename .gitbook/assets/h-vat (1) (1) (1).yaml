@@ -522,7 +522,7 @@ paths:
     get:
       tags:
         - video-tasks
-      summary: /video-tasks?isActive=true [fetch Video Tasks List]
+      summary: Fetch Video Task
       operationId: fetchVideoTaskWithId
       parameters:
         - in: header

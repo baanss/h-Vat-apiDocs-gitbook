@@ -12,14 +12,14 @@ Annotation Data를 관리하는 API입니다.
 
 Annotation 업데이트
 
-{% swagger src="../../.gitbook/assets/h-vat (1).yaml" path="/annotations/{id}/data" method="put" %}
-[h-vat (1).yaml](<../../.gitbook/assets/h-vat (1).yaml>)
+{% swagger src="../../.gitbook/assets/h-vat (1) (1).yaml" path="/annotations/{id}/data" method="put" %}
+[h-vat (1) (1).yaml](<../../.gitbook/assets/h-vat (1) (1).yaml>)
 {% endswagger %}
 
 ## Download Annotations
 
 Annotation 전부 다운로드
 
-{% swagger src="../../.gitbook/assets/h-vat (1).yaml" path="/annotations/download" method="get" %}
-[h-vat (1).yaml](<../../.gitbook/assets/h-vat (1).yaml>)
+{% swagger src="../../.gitbook/assets/h-vat (1) (1).yaml" path="/annotations/download" method="get" %}
+[h-vat (1) (1).yaml](<../../.gitbook/assets/h-vat (1) (1).yaml>)
 {% endswagger %}

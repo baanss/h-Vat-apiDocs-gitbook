@@ -6,6 +6,19 @@ description: h-vat API 명세입니다 (v1.0.0)
 
 링크를 클릭하여 각 스키마에 대한 API를 확인하실 수 있습니다.
 
+## Auth
+
+사용자의 인증정보(토큰) 확인
+
+{% content-ref url="auth.md" %}
+[auth.md](auth.md)
+{% endcontent-ref %}
+
+* [**GET** /auths](auth.md#get-auths)
+* [**POST** /auths/login](auth.md#post-auths-login)
+* [**POST** /auths/logout](auth.md#post-auths-logout)
+* [**POST** /auths/restore-token](auth.md#post-auths-restore-token)
+
 ## Users
 
 h-vat을 사용하는 사용자와 관련된 API
@@ -19,26 +32,6 @@ h-vat을 사용하는 사용자와 관련된 API
 * [**PATCH** /users/{id}](users.md#users-id)
 * [**PUT** /users/{id}/password](users.md#users-id-password)
 * [**DELETE** /users/{id}](users.md#users-id-1)
-
-## Login
-
-사용자 로그인 API
-
-{% content-ref url="login.md" %}
-[login.md](login.md)
-{% endcontent-ref %}
-
-* [**POST** /login](login.md#login)
-
-## Auth
-
-사용자의 토큰 확인
-
-{% content-ref url="auth.md" %}
-[auth.md](auth.md)
-{% endcontent-ref %}
-
-* [**GET** /auth](auth.md#auth)
 
 ## Videos
 

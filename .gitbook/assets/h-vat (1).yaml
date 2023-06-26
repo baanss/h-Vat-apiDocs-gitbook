@@ -19,13 +19,11 @@ tags:
     externalDocs:
       description: Check more Info on GitBook
       url: "https://bans.gitbook.io/h-vat-api-docs/"
-  - name: login
-    description: Login User
+  - name: auths
+    description: Auth Info For User
     externalDocs:
       description: Check more Info on GitBook
       url: "https://bans.gitbook.io/h-vat-api-docs/"
-  - name: auth
-    description: Authorization User
   - name: videos
     description: Operations about video
   - name: video-tasks
@@ -37,17 +35,13 @@ tags:
 paths:
   /users:
     post:
+      security:
+        - bearerAuth: []
       tags:
         - users
       summary: Create user
       description: This can only be done by the logged in Admin user.
       operationId: createUser
-      parameters:
-        - in: cookie
-          name: accessToken
-          description: 로그인중인 사용자의 accessToken
-          schema:
-            type: string
       responses:
         "201":
           description: successful operation
@@ -60,9 +54,7 @@ paths:
                     type: string
                     example: user created
         "401":
-          description: 401 Unauthorized, Invalid Token
-        "403":
-          description: 403 Forbidden
+          $ref: "#/components/responses/UnauthorizedError"
       requestBody:
         content:
           application/json:
@@ -242,10 +234,29 @@ paths:
           description: 401 Unauthorized, Invalid Token
         "403":
           description: 403 Forbidden, Mismatched UserID or Admin Only
-  /login:
+  /auths:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - auths
+      summary: Check Current User
+      operationId: checkUserAuth
+      responses:
+        "200":
+          description: Current User's(logged in) Information
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CurrentUserOutput"
+        "401":
+          description: 401 Unauthorized, Invalid Token
+  /auths/login:
     post:
       tags:
-        - login
+        - auths
       summary: User Login
       operationId: loginUser
       requestBody:
@@ -256,21 +267,36 @@ paths:
               properties:
                 email:
                   type: string
-                  description: 유저의 email
-                  example: example@hutom.io
+                  example: mail@hutom.co.kr
                 password:
                   type: string
-                  description: 새로운 Password
-                  example: example
+                  example: NEED_TO_CHANGE!
       responses:
         "200":
-          description: successful operation
+          description: Generate Access Token
           headers:
             Set-Cookie:
-              description: Set AccessToken
               schema:
                 type: string
-                example: accessToken=eyJhbGciOi...
+                example: refreshToken=JWT_REFRESH_TOKEN; Path=/; HttpOnly
+          content:
+            application/json:
+              schema:
+                type: string
+                example: JWT_ACCESS_TOKEN (Refresh Token set on header[set-cookie])
+        "422":
+          description: 422 Unprocessable Entity, 가입되지 않은 계정으로 로그인 혹은 비밀번호 불일치
+  /auths/logout:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - auths
+      summary: Logout User
+      operationId: logoutUser
+      responses:
+        "200":
+          description: 사용자 로그아웃 성공 여부 (기존 사용하던 토큰 - blacklist로 관리)
           content:
             application/json:
               schema:
@@ -278,30 +304,25 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: login successed
+                    example: 사용자 로그아웃 성공
         "401":
-          description: 401 Unauthorized, Invalid Mail or Invalid Password
-  /auth:
-    get:
+          description: 401 Unauthorized, Invalid Token
+  /auths/restore-token:
+    post:
+      security:
+        - cookieAuth: []
       tags:
-        - auth
-      summary: Check Token
-      operationId: checkUserAuth
-      parameters:
-        - in: header
-          name: accessToken
-          description: 로그인중인 사용자의 accessToken
-          schema:
-            type: string
+        - auths
+      summary: Restore AccessToken with RefreshToken
+      operationId: restoreToken
       responses:
         "200":
-          description: 200 OK
+          description: 재발행된 AccessToken
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/User"
+                type: string
+                example: [Restored AccessToken(JWT)]
         "401":
           description: 401 Unauthorized, Invalid Token
   /videos:
@@ -522,7 +543,7 @@ paths:
     get:
       tags:
         - video-tasks
-      summary: /video-tasks?isActive=true [fetch Video Tasks List]
+      summary: Fetch Video Task
       operationId: fetchVideoTaskWithId
       parameters:
         - in: header
@@ -909,6 +930,18 @@ externalDocs:
   description: Find out more about h-vat on GitBook
   url: "https://bans.gitbook.io/h-vat-api-docs/"
 components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT # optional, arbitrary value for documentation purposes
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: refreshToken
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
   schemas:
     User:
       type: object
@@ -922,6 +955,9 @@ components:
         password:
           type: string
           description: encrypted password
+        name:
+          type: string
+          description: User Name
         image:
           type: string
           description: base64 encoded
@@ -963,6 +999,46 @@ components:
           type: number
           format: date-time
           description: Last Logined At
+    CurrentUserOutput:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Object Id (Auto Gen)
+          example: "646b2e6455814c2c3f6eca83"
+        email:
+          type: string
+          description: Login ID (Mail Addr)
+          example: "bans@hutom.co.kr"
+        name:
+          type: string
+          description: User Name
+          example: "John Doe"
+        task:
+          type: string
+          enum:
+            - VIDEO
+            - RUS
+          description: Video or RUS TASK (User)
+        role:
+          type: object
+          properties:
+            annotator:
+              type: boolean
+            admin:
+              type: boolean
+            inspector:
+              type: boolean
+          description: User's Role (Annotator, Inspector, Admin)
+          example: { annotator: true, admin: false, inspector: false }
+        isAgreed:
+          type: boolean
+          default: true
+          description: Whether you agree to the terms
+        isActive:
+          type: boolean
+          default: true
+          description: Whether the user is active
     Video:
       type: object
       properties:
