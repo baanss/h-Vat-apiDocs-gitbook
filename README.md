@@ -17,7 +17,7 @@ description: h-vat (Hutom Video Annotation Tool) API Docs (작성중)
 
 23년 5월 2일에 초안이 작성되었습니다.
 
-Last Updated At : 2023. 05. 24 (Wed) 14:53 (Asia/Seoul)
+Last Updated At : 2023. 06. 27 (Tue)
 
 > Google Docs : \[[Link](https://docs.google.com/document/d/1oMv\_sxEzvJUFiEH-hPig-7OnLKNk-iQwdIpWNBl1YXw/)]
 >
